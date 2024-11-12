@@ -1,0 +1,83 @@
+server:
+  port: 8000
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+spring:
+  application:
+    name: apigateway-service
+  cloud:
+    gateway:
+      default-filters: # default-filter를 global filter으로 사용
+        - name: GlobalFilter # class 이름
+          args: # 위의 클래스에서 상속받은 AbstractGatewayFilterFactory의 제네릭에 표시된 클래스의 파라미터들
+            baseMessage: Spring Cloud Gateway Global Filter
+            preLogger: true
+            postLogger: true
+      routes:
+#        - id: user-service # route의 고유 식별자 - 코드에서 식별용으로 쓰는것 같음
+#          uri: lb://USER-SERVICE # Eureka에 등록된 서비스 이름으로 로드밸런싱
+#          predicates:
+#            - Path=/user-service/** # 모든 /user-service 하위 요청에 대하여 lb://USER-SERVICE/user-service/** 로 로드 밸런싱
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/login # 로그인 요청
+            - Method=POST
+          filters: # 위의 요청 경로(POST /user-service/login)에 대한 필터처리
+            - RemoveRequestHeader=Cookie # POST 요청이 오면, request header 값을 초기화 (매번 새로운 데이터로 인식하기 위해?)
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment} # /user-service/(?<segment>.*) 형태의 경로로 요청이 오면, /$\{segment} 로 바꾸겠다는 뜻
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/users # 회원가입 요청
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/** # user-service에 대한 모든 경로들 (/login과 /users는 위에 정의함)
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - AuthorizationHeaderFilter
+        - id: order-service
+          uri: lb://ORDER-SERVICE
+          predicates:
+            - Path=/order-service/**
+        - id: catalog-service
+          uri: lb://CATALOG-SERVICE
+          predicates:
+            - Path=/catalog-service/**
+        - id: first-service
+          uri: lb://MY-FIRST-SERVICE
+          predicates:
+            - Path=/first-service/**
+          filters:
+            - AddRequestHeader=first-request, first-request-header-by-yaml # first-service에 요청이 들어오면 first-request헤더와 first-request-header-by-yaml값이 요청에 추가됨
+            - AddResponseHeader=first-response, first-response-header-from-yaml # 응답으로 first-request헤더와 first-request-header-by-yaml값이 응답에 추가됨
+            - CustomFilter # 추가로 전달할 파라미터가 없으면 그냥 이렇게 쓰면되지만, 있다면 name으로 지정해 주어야 함(second-service의 filter 참고)
+        - id: second-service
+          uri: lb://MY-SECOND-SERVICE
+          predicates:
+            - Path=/second-service/**
+          filters:
+#            - AddRequestHeader=second-request, second-request-header-by-yaml
+#            - AddResponseHeader=second-response, second-response-header-from-yaml
+            - name: LoggingFilter
+              args:
+                baseMessage: Hi, there.
+                preLogger: true
+                postLogger: true
+            - name: CustomFilter
+
+token:
+  secret: user_token_test_for_signature
