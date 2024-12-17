@@ -13,6 +13,24 @@
 
 <br>
 
+## Spring Security는 왜 Servlet Filter로 동작해야 하는가 ?
+> Java 웹 애플리케이션의 구조와 보안 요구 사항에 적합한 특성을 제공하기 때문
+1. Servlet Filter의 역할과 위치
+   * Servlet Filter는 Java EE 표준 스펙으로, 클라의 요청이 실제 비즈니스 로직(ex. Spring MVC의 DispatcherServlet)에 도달하기 전에, HTTP 요청과 응답을 가로채고 처리할 수 있음
+   * 즉, Servlet Filter의 특성을 활용하여 요청이 Spring MVC나 다른 애플리케이션 로직에 도달하기 전 인증 및 인가 처리
+2. 보안 강화
+   * 요청이 유효하지 않거나 보안 위협이 있는 경우 필터 단계에서 차단
+     * 보안 위협(예: 잘못된 토큰, 세션 탈취 등)을 초기 단계에서 탐지하고 대응
+     * CSRF 방어, XSS 방어 등 전역적인 보안 작업 수행
+3. 유연성과 확장성
+   * 다양한 인증 방식 지원
+     * 예를 들어, 하나의 애플리케이션에서 세션 기반 인증과 JWT 기반 인증을 동시에 지원할 수 있음
+     * 요청별로 다른 SecurityFilterChain을 적용함으로써 가능
+   * 요청 조건에 따른 처리
+     * URL 패턴뿐만 아니라, HTTP 메서드, 헤더 등 다양한 조건(RequestMatcher)을 기준으로 특정 필터 체인을 실행할 수 있음
+
+<br>
+
 ## DelegatingFilterProxy
 * Spring Security는 Servlet Filter로 동작함
 * 하지만 Servlet Filter는 Servlet Container에서 직접 관리되기 때문에,
@@ -92,4 +110,15 @@
     }
     ```
 
-<br>
+
+## Todo
+### 1. Apache Tomcat 구조
+### 2. Spring IOC Container 구조
+### 3. Servlet Container 구조
+### 4. Filter 동작
+### 5. Interceptor 동작
+### 6. Servlet Filter란 ?
+* Spring Security는 왜 Servlet Filter로 동작하도록 만들었는가 ?
+### 7. WAS의 Filter가 따로 있는가 ?
+### 8. 있다면, Servlet Filter와 WAS의 필터 차이?
+### 9. Spring 생태계 - 요청의 전반적인 흐름
