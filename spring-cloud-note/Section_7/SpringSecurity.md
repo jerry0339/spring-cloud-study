@@ -112,16 +112,3 @@
 
     }
     ```
-
-
-## Todo
-### 1. Apache Tomcat 구조
-### 2. Spring IOC Container 구조
-### 3. Servlet Container 구조
-### 4. Filter 동작
-### 5. Interceptor 동작
-### 6. Servlet Filter란 ?
-* Spring Security는 왜 Servlet Filter로 동작하도록 만들었는가 ?
-### 7. WAS의 Filter가 따로 있는가 ?
-### 8. 있다면, Servlet Filter와 WAS의 필터 차이?
-### 9. Spring 생태계 - 요청의 전반적인 흐름
